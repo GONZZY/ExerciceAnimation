@@ -9,17 +9,28 @@ public class PyramidGeneratorComponent : MonoBehaviour
 {
     [SerializeField] private float longueurBase = 1;
     [SerializeField] private float hauteur = 1;
-    private static Vector3[] baseVertices = new Vector3[]
+    private static Vector3[] baseVerticesFace = new Vector3[]
     {
-        // Base
+        // Face Triangulaire
         new Vector3(0,1,0),
         new Vector3(0.5f,0,-0.5f),
         new Vector3(-0.5f,0,-0.5f),
     };
-    private static Matrix4x4[] rotations = new []
+    private static Vector3[] baseBaseVertices = new Vector3[]
     {
-        Matrix4x4.Rotate(Quaternion.identity),   
-        
+        // Base
+        new Vector3(0.5f,0,-0.5f),
+        new Vector3(-0.5f,0,-0.5f),
+        new Vector3(-0.5f,0,0.5f)
+    };
+    private static Matrix4x4[] rotationsBases = new[]
+    {
+        Matrix4x4.Rotate(Quaternion.identity),
+        Matrix4x4.Rotate(Quaternion.Euler(0,180,0))
+    };
+    private static Matrix4x4[] rotationsFaces = new []
+    {
+        Matrix4x4.Rotate(Quaternion.identity),
         Matrix4x4.Rotate(Quaternion.Euler(0,90,0)),   
         Matrix4x4.Rotate(Quaternion.Euler(0,180,0)),   
         Matrix4x4.Rotate(Quaternion.Euler(0,270,0)),
@@ -28,43 +39,52 @@ public class PyramidGeneratorComponent : MonoBehaviour
 
     private static int[] baseTris = new int[]
     {
-        0,1,2,2,3,0
+        0,1,2
+    };
+    private static int[] baseBaseTris = new int[]
+    {
+        14,13,12,17,16,15
     };
     private void Awake()
     {
         Mesh m = GetComponent<MeshFilter>().mesh;
         m.vertices = GenerateVertices();
         m.triangles = GenerateTris();
+        m.uv = GenerateUvs();
         m.RecalculateNormals();
     }
     private Vector3[] GenerateVertices()
     {
-        // Générer les sommets
-        // Comment?
-        // Créer les 4 premiers sommets et additionner la
-        // rotation de ces sommets autour de l'origine du cube
-        Vector3[] vertices = new Vector3[16];
-
-        int currentVertex = 0;
-        // Pour chaque rotation je veux créer un nouveau sommet 4 fois avec cette rotation
-        // Pour chaque rotation...
-        for (int i = 0; i < rotations.Length; ++i)
+        Vector3[] vertices = new Vector3[18];
+        
+        int compteur = 0;
+        //Génère les vertex des faces triangulaires
+        for(int t = 0; t < 4; t++)
         {
-            // Pour chaque base vertex...
-            for (int j = 0; j < baseVertices.Length; ++j)
+            for (int k = 0; k < 3; k++)
             {
-                vertices[currentVertex++] = rotations[i].MultiplyPoint(baseVertices[j]);
-                //++currentVertex;
+                vertices[compteur] = rotationsFaces[t].MultiplyPoint(baseVerticesFace[k]);
+                compteur++;
             }
         }
-
+        // Génère les vertex des bases
+        for(int i = 0; i < 2; i++)
+        {
+            for(int j = 0; j < 3; j++)
+            {
+                vertices[compteur] = rotationsBases[i].MultiplyPoint(baseBaseVertices[j]);
+                compteur++;
+            }
+        }
+        
         return vertices;
     }
-
+    
     private int[] GenerateTris()
     {
-        int[] tris = new int[18];
+        int[] tris = new int[24];
 
+        
         int currentTriIndex = 0;
         
         // Pour chaque face de la pyramide...
@@ -72,15 +92,22 @@ public class PyramidGeneratorComponent : MonoBehaviour
         {
             for (int j = 0; j < baseTris.Length; j++)
             {
-                tris[currentTriIndex++] = baseTris[j] + (4 * i);
+                tris[currentTriIndex++] = baseTris[j] + (3 * i);
             }
         }
+        // Pour chaque triangle de la base...
+        for (int i = 0; i < 6; i++)
+        {
+            tris[currentTriIndex] = baseBaseTris[i];
+            currentTriIndex++;
 
+        }
+        
         return tris;   
     }
+    private Vector2[] GenerateUvs()
+    {
+        Vector2[] uvs = new Vector2[] { };
+        return uvs;
+    }
 }
-
-    
-    
-
-
