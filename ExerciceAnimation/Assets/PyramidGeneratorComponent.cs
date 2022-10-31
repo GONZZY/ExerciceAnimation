@@ -45,6 +45,21 @@ public class PyramidGeneratorComponent : MonoBehaviour
     {
         14,13,12,17,16,15
     };
+    private static Vector2[] baseUvFace = new Vector2[]
+    {
+        new Vector2(0.5f,1),
+        new Vector2(1,0.5f),
+        new Vector2(0,0.5f)
+    };
+    private static Vector2[] baseUvBase = new Vector2[]
+    {
+        new Vector2(1,0.5f),
+        new Vector2(0,0.5f),
+        new Vector2(0,0),
+        new Vector2(0,0),
+        new Vector2(1,0),
+        new Vector2(1,0.5f),
+    };
     private void Awake()
     {
         Mesh m = GetComponent<MeshFilter>().mesh;
@@ -68,9 +83,9 @@ public class PyramidGeneratorComponent : MonoBehaviour
             }
         }
         // Génère les vertex des bases
-        for(int i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
-            for(int j = 0; j < 3; j++)
+            for (int j = 0; j < 3; j++)
             {
                 vertices[compteur] = rotationsBases[i].MultiplyPoint(baseBaseVertices[j]);
                 compteur++;
@@ -105,9 +120,28 @@ public class PyramidGeneratorComponent : MonoBehaviour
         
         return tris;   
     }
+
     private Vector2[] GenerateUvs()
     {
-        Vector2[] uvs = new Vector2[] { };
+        Vector2[] uvs = new Vector2[18];
+       
+        int compteur = 0;
+        // UV des faces...
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                uvs[compteur] = baseUvFace[j];
+                compteur++;
+            }
+        }
+
+        for (int i = 0;i<6; i++)
+        {
+            uvs[compteur] = baseUvBase[i];
+            compteur++;
+        }
+        
         return uvs;
     }
 }
